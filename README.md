@@ -166,17 +166,20 @@
 批量文件上传到cos会并行触发转码执行。
 
 1. 登陆云函数控制台，查看日志监控。
+![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/5.png)
 2. 直接点击函数对应的cls日志，查看日志检索分析 。
+![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/6.png)
+![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/7.png)
 
 ## 自定义FFmpeg
 
 转码应用场景中默认使用的是ffmpeg v1.1版本，如果您想自定义ffmpeg版本，执行以下操作：
 
 1. 将样例中的ffmpeg替换成你自定义的ffmpeg版本。
-2. transcode-demo项目目录下再次执行sls deploy部署更新。
+2. transcode-demo/transcode目录下再次执行sls deploy部署更新。
 
 ```
- cd transcode-demo && sls deploy
+ cd transcode && sls deploy
 ```
 
 ## 运行角色
@@ -184,13 +187,13 @@
 转码函数运行时需要读取cos资源进行转码，并将转码后的资源写回cos，因此需要给函数配置一个授权cos全读写的运行角色。更多参考[函数运行角色](https://cloud.tencent.com/document/product/583/47933#.E8.BF.90.E8.A1.8C.E8.A7.92.E8.89.B2)。
 
 1. 登录 [访问管理](https://console.cloud.tencent.com/cam/role) 控制台，选择新建角色，角色载体为腾讯云产品服务。
-
-   
-
+ ![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/1.png) 
+ 
 2. 在“输入角色载体信息”步骤中勾选【云函数（scf）】，并单击【下一步】：
+![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/2.png)
 
 3. 在“配置角色策略”步骤中，选择函数所需策略并单击【下一步】。如下图所示：
-
+![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/3.png)
    
 
    > 说明：
@@ -198,3 +201,4 @@
    > 您可以直接选择 `QcloudCOSFullAccess` 对象存储（COS）全读写访问权限，如果需要更细粒度的权限配置，请根据实际情况配置选择。
 
 4. 输入角色名称，完成创建角色及授权。
+![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/4.png)
