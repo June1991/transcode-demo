@@ -111,9 +111,9 @@
      role: transcodeRole # 函数执行角色，已授予cos对应桶全读写权限
      runtime: Python3.6 
      memorySize: 3072 # 内存大小，单位MB
-  timeout: 43200 # 函数执行超时时间，单位秒
+     timeout: 43200 # 函数执行超时时间，单位秒
      region: ${env:REGION} # 函数区域，统一在环境变量中定义，
-  asyncRunEnable: true # 是否支持长时运行，目前只支持上海区
+     asyncRunEnable: true # 是否支持长时运行，目前只支持上海区
      cls: # 函数日志
        logsetId: ${output:${stage}:${app}:cls-video.logsetId}  # cls日志集
        topicId: ${output:${stage}:${app}:cls-video.topicId}  # cls日志主题
