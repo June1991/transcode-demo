@@ -29,7 +29,7 @@
 
 3. 需要为转码应用的云函数创建运行角色，并授权cos读写权限。详细配置参考[运行角色](#运行角色)。
 
-4. ffmpeg不同转码场景下指令会不同，因此需要您具有一定的ffmpeg使用经验 。 本文中仅提供几个样例作为参考，更多ffmpeg指令参考[FFmpeg官网](https://ffmpeg.org/documentation.html)。
+4. ffmpeg不同转码场景下指令配置参数不同，因此需要您具有一定的ffmpeg使用经验 。 本文中仅提供几个样例作为参考，更多ffmpeg指令参考[FFmpeg官网](https://ffmpeg.org/documentation.html)。
 
 
 ## 前提条件
@@ -42,7 +42,7 @@
 ## 操作步骤
 1. 下载[转码应用](https://cloud.tencent.com/document/product/1154/42990)。
 
-2. 解压文件，进入项目目录transcode-demo，将看到目录结构如下：
+2. 解压文件，进入项目目录`transcode-demo`，将看到目录结构如下：
 
    ```
    transcode-demo
@@ -97,8 +97,8 @@
 
    ```
    #组件信息
-   component: cls # (必填) 引用 component 的名称
-   name: cls-video # (必填) 创建的实例名称，请修改成您的实例名称
+   component: cls # 引用 component 的名称
+   name: cls-video # 创建的实例名称，请修改成您的实例名称
    
    #组件参数
    inputs:
@@ -112,8 +112,8 @@
 
    ```
    #组件信息
-   component: scf # (必填) 引用 component 的名称
-   name: transcode-video # (必填) 创建的实例名称，请修改成您的实例名称
+   component: scf # 引用 component 的名称
+   name: transcode-video # 创建的实例名称，请修改成您的实例名称
    
    #组件参数
    inputs:
@@ -127,7 +127,7 @@
      region: ${env:REGION} # 函数区域，统一在环境变量中定义
      asyncRunEnable: true # 开启长时运行，目前只支持上海区
      cls: # 函数日志
-       logsetId: ${output:${stage}:${app}:cls-video.logsetId}  # cls日志集
+       logsetId: ${output:${stage}:${app}:cls-video.logsetId}  # cls日志集  cls-video为cls组件的实例名称
        topicId: ${output:${stage}:${app}:cls-video.topicId}  # cls日志主题
      environment: 
        variables:  # 转码参数
@@ -154,7 +154,7 @@
    >- 内存大小上限为3072 MB，运行时长上限为43200 s。如需调整，请提工单申请配额调整。
    >- 转码应用必须开启函数长时运行asyncRunEnable: true。
    >- 运行角色请根据[运行角色](#运行角色)创建并授权。
-   >- 示例配置的ffmpeg指令不适用于所有转码场景，详细介绍参考[ffmpeg指令]( #FFmpeg指令)。
+   >- 示例配置的ffmpeg指令仅适用于avi转码场景，详细介绍参考[ffmpeg指令]( #FFmpeg指令)。
    
 5. 在`transcode-demo`项目目录下，执行`sls deploy`部署项目。
 
@@ -186,7 +186,7 @@
 
 ### ffmpeg指令
 
- `transcode-demo/transcode/serverless.yml`中 `DST_FORMATS`与`FFMPEG_CMD`指定了转码应用的转码指令，您可根据应用场景自定义配置。
+yml文件 `transcode-demo/transcode/serverless.yml`中 `DST_FORMATS`与`FFMPEG_CMD`指定了转码应用的转码指令，您可根据应用场景自定义配置。
 
 例：转码mp4格式视频，可以将FFMPEG_CMD配置为:
 
@@ -195,18 +195,11 @@ DST_FORMATS: mp4
 FFMPEG_CMD: ffmpeg -i {inputs} -vcodec copy -y -f {dst_format} -movflags frag_keyframe+empty_moov {outputs}
 ```
 
-例：额外指定ffmpeg的输出日志等级，获取更详尽的日志，可以将FFMPEG_CMD配置为:
-
-```
-DST_FORMATS: avi
-FFMPEG_CMD: ffmpeg -v trace -i {inputs} -y -f {dst_format} {outputs}
-```
-
 
 > 说明：
 >
 > - FFMPEG_CMD 必须包含ffmpeg配置参数和格式化部分，否则会造成转码任务失败。
-> - ffmpeg指令定义需要您具有一定的ffmpeg使用经验。以上提供的指令仅仅是针对这几个应用场景的指令，更多ffmpeg指令参考[FFmpeg官网](https://ffmpeg.org/documentation.html)。
+> - ffmpeg不同转码场景下指令配置参数不同，因此需要您具有一定的ffmpeg使用经验。以上提供的指令仅仅是针对这几个应用场景的指令。更多ffmpeg指令参考[FFmpeg官网](https://ffmpeg.org/documentation.html)。
 
 ### 自定义ffmpeg
 
