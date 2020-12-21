@@ -1,29 +1,41 @@
 ## 应用简介
 使用COS+云函数+CLS+FFmpeg，快速构建高可用、并行处理、实时日志、高度自定义视频转码服务。
 
-应用优势：
+### 架构原理
 
-- 流式转码，流式读写cos，转码大小不受云函数内存大小限制。
-- 实时日志输出，可实时查看转码进度。
-- 函数长时运行，最高能完成12小时内的转码应用服务。
+通过云函数创建ffmpeg任务进程，云函数进程与ffmpeg任务进程通过pipe和fifo的方式进行数据传输。云函数进程中的两个任务线程分别接收ffmpeg任务进程向函数进程输出的ffmpeg日志流与转码后的文件流。实时日志线程将日志流输出，上传任务负责缓存文件流并上传至用户定义的输出cos。 
 
-应用创建的资源：
+![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/8.png)
+
+### 应用优势
+
+1. 流式转码。采用流式拉取源视频文件，流式上传转码文件的工作方式，突破了本地存储的限制，且不需要额外部署cfs等产品。
+2. 实时日志。视频转码过程中，可通过cls日志服务实时查看转码进度。同时支持输出ffmpeg应用的完整日志。
+3. 长时运行。利用云函数的长时运行机制，支持12h的运行时长，可覆盖大文件耗时较长的转码场景。
+4. 自定义参数。支持用户自定义配置ffmpeg命令参数。
+
+### 应用资源
+
+ 转码应用部署后，将为您创建以下资源：
 
 - 云函数 ： 流式读取cos文件，使用ffmpeg转码后流式输出回cos中，并将转码过程的实时日志输出到cls。
-- 层 ： 转码需要使用的云函数runtime下的ffmpeg可执行文件。
 - cls日志 ：存储转码过程的实时日志。cls日志可能会产生一定计费，详情参考[cls计费规则](https://cloud.tencent.com/document/product/614/47116)。
 
-注意事项：
+### 注意事项
 
-1.  转码应用需要依赖云函数长时运行能力，目前该能力还在公测中，需要先申请白名单。
-2.  转码输出桶与函数建议配置在同一区域，因为跨区域配置转码应用稳定性及效率都会降低，并且会产生跨区流量费用。
-3.  需要为转码应用的云函数创建运行角色，并授权cos读写权限。详细配置参考[运行角色](#运行角色)。
-4.   FFmpeg转码工具对于不同格式之间的转码，参数会有区别，本文仅提供几个样例作为转码参考，更多转码参数使用请参考[FFmpeg官网](https://ffmpeg.org/documentation.html)
+1. 转码应用需要依赖云函数长时运行能力，目前该能力还在公测中，需要先[申请白名单](https://cloud.tencent.com/apply/p/hz85krvp8s8)。
+
+2. 转码输出桶与函数建议配置在同一区域，因为跨区域配置转码应用稳定性及效率都会降低，并且会产生跨区流量费用。
+
+3. 需要为转码应用的云函数创建运行角色，并授权cos读写权限。详细配置参考[运行角色](#运行角色)。
+
+4. ffmpeg不同转码场景下指令会不同，因此需要您具有一定的ffmpeg使用经验 。 本文中仅提供几个样例作为参考，更多ffmpeg指令参考[FFmpeg官网](https://ffmpeg.org/documentation.html)。
+
 
 ## 前提条件
 
 1. [安装serverlesss framework](https://cloud.tencent.com/document/product/1154/42990)
-2. 应用依赖函数长时运行能力，目前该能力还在公测中，需要先申请白名单。
+2. 函数长时运行[白名单申请](https://cloud.tencent.com/apply/p/hz85krvp8s8)。
 3. 配置部署账号权限。参考 [账号和权限配置](https://cloud.tencent.com/document/product/1154/43006) 
 4. 配置[运行角色](#运行角色)权限。
 
@@ -46,19 +58,19 @@
    
    ```
 
-   a)  log/serverless.yml 定义一个cls日志集和主题，用于转码过程输出的日志保存，目前采用腾讯云cls日志存储。每个转码应用将会根据配置的cls日志集和主题去创建相关资源，cls的使用会产生计费，具体参考[cls计费规则](https://cloud.tencent.com/document/product/614/47116)。
+   a)  `log/serverless.yml` 定义一个cls日志集和主题，用于转码过程输出的日志保存，目前采用腾讯云cls日志存储。每个转码应用将会根据配置的cls日志集和主题去创建相关资源，cls的使用会产生计费，具体参考[cls计费规则](https://cloud.tencent.com/document/product/614/47116)。
 
-   b)  transcode/serverless.yml 定义函数的基础配置及转码参数配置。
+   b)  `transcode/serverless.yml` 定义函数的基础配置及转码参数配置。
 
-   c)  transcode/index.py 转码功能实现。
+   c)  `transcode/index.py` 转码功能实现。
 
-   d)  transcode/task_report.py cls日志上报接口。
+   d)  `transcode/task_report.py` cls日志上报接口。
 
-   e)   transcode/ffmpeg 转码工具ffmpeg。
+   e)   `transcode/ffmpeg` 转码工具ffmpeg。
 
 3. 配置环境变量和应用参数
 
-   a)  应用参数，文件transcode-demo/serverless.yml
+   a)  应用参数，文件`transcode-demo/serverless.yml`
 
    ```
    #应用信息
@@ -66,7 +78,7 @@
    stage: dev # 环境名称，默认为dev
    ```
 
-   a)  环境变量，文件transcode-demo/.env
+   a)  环境变量，文件`transcode-demo/.env`
 
    ```
    REGION=ap-shanghai  # 应用创建所在区，目前只支持上海区
@@ -81,7 +93,7 @@
 
 4. 配置转码需要的参数信息
 
-   a)  cls日志定义，文件transcode-demo/log/serverless.yml
+   a)  cls日志定义，文件`transcode-demo/log/serverless.yml`
 
    ```
    #组件信息
@@ -96,7 +108,7 @@
      period: 7 # 日志保存时间，单位天
    ```
 
-   b)  云函数及转码配置，文件transcode-demo/transcode/serverless.yml ：  
+   b)  云函数及转码配置，文件`transcode-demo/transcode/serverless.yml` ：  
 
    ```
    #组件信息
@@ -112,21 +124,19 @@
      runtime: Python3.6 
      memorySize: 3072 # 内存大小，单位MB
      timeout: 43200 # 函数执行超时时间，单位秒
-     region: ${env:REGION} # 函数区域，统一在环境变量中定义，
-     asyncRunEnable: true # 是否支持长时运行，目前只支持上海区
+     region: ${env:REGION} # 函数区域，统一在环境变量中定义
+     asyncRunEnable: true # 开启长时运行，目前只支持上海区
      cls: # 函数日志
        logsetId: ${output:${stage}:${app}:cls-video.logsetId}  # cls日志集
        topicId: ${output:${stage}:${app}:cls-video.topicId}  # cls日志主题
-     layers: # layer配置
-       - name: ${output:${stage}:${app}:ffmpeg-layer.name} # layer名称
-         version: ${output:${stage}:${app}:ffmpeg-layer.version} # 版本
      environment: 
        variables:  # 转码参数
          REGION: ${env:REGION} # 输出桶区域
          DST_BUCKET: test-123456789 # 输出桶名称
-         DST_PATH: outputs/ # 输出桶路径
+         DST_PATH: video/outputs/ # 输出桶路径
          DST_FORMATS: avi # 转码生成格式
-         DST_CONFIG: ffmpeg -i {inputs} -y -f {outputs}  # 转码命令
+         FFMPEG_CMD: ffmpeg -i {inputs} -y -f {dst_format} {outputs}  # 转码基础命令，您可自定义配置，但必须包含ffmpeg配置参数和格式化部分，否则会造成转码任务失败。
+         FFMPEG_DEBUG: 0 # 是否在日志中输出 0为不输出 1为输出
          TZ: Aisa/Shanghai # cls日志输出时间的时区
      events:
        - cos: # cos触发器    	
@@ -144,6 +154,7 @@
    >- 内存大小上限为3072 MB，运行时长上限为43200 s。如需调整，请提工单申请配额调整。
    >- 转码应用必须开启函数长时运行asyncRunEnable: true。
    >- 运行角色请根据[运行角色](#运行角色)创建并授权。
+   >- 示例配置的ffmpeg指令不适用于所有转码场景，详细介绍参考[ffmpeg指令]( #FFmpeg指令)。
    
 5. 在`transcode-demo`项目目录下，执行`sls deploy`部署项目。
 
@@ -171,11 +182,37 @@
 ![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/6.png)
 ![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/7.png)
 
-## 自定义FFmpeg
+## FFmpeg工具
 
-转码应用场景中默认使用的是ffmpeg v1.1版本，如果您想自定义ffmpeg版本，执行以下操作：
+### ffmpeg指令
 
-1. 将样例中的ffmpeg替换成你自定义的ffmpeg版本。
+ `transcode-demo/transcode/serverless.yml`中 `DST_FORMATS`与`FFMPEG_CMD`指定了转码应用的转码指令，您可根据应用场景自定义配置。
+
+例：转码mp4格式视频，可以将FFMPEG_CMD配置为:
+
+```
+DST_FORMATS: mp4
+FFMPEG_CMD: ffmpeg -i {inputs} -vcodec copy -y -f {dst_format} -movflags frag_keyframe+empty_moov {outputs}
+```
+
+例：额外指定ffmpeg的输出日志等级，获取更详尽的日志，可以将FFMPEG_CMD配置为:
+
+```
+DST_FORMATS: avi
+FFMPEG_CMD: ffmpeg -v trace -i {inputs} -y -f {dst_format} {outputs}
+```
+
+
+> 说明：
+>
+> - FFMPEG_CMD 必须包含ffmpeg配置参数和格式化部分，否则会造成转码任务失败。
+> - ffmpeg指令定义需要您具有一定的ffmpeg使用经验。以上提供的指令仅仅是针对这几个应用场景的指令，更多ffmpeg指令参考[FFmpeg官网](https://ffmpeg.org/documentation.html)。
+
+### 自定义ffmpeg
+
+转码应用场景中提供了默认的ffmpeg工具，如果您想自定义ffmpeg，执行以下操作：
+
+1. 将样例中的ffmpeg替换成你自定义的ffmpeg。
 2. transcode-demo/transcode目录下再次执行sls deploy部署更新。
 
 ```
@@ -188,7 +225,7 @@
 
 1. 登录 [访问管理](https://console.cloud.tencent.com/cam/role) 控制台，选择新建角色，角色载体为腾讯云产品服务。
  ![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/1.png) 
- 
+
 2. 在“输入角色载体信息”步骤中勾选【云函数（scf）】，并单击【下一步】：
 ![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/2.png)
 
