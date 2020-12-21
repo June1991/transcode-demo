@@ -123,7 +123,7 @@
      role: transcodeRole # 函数执行角色，已授予cos对应桶全读写权限
      runtime: Python3.6 
      memorySize: 3072 # 内存大小，单位MB
-     timeout: 43200 # 函数执行超时时间，单位秒
+     timeout: 43200 # 函数执行超时时间, 单位秒, 即本demo目前最大支持12h运行时长
      region: ${env:REGION} # 函数区域，统一在环境变量中定义
      asyncRunEnable: true # 开启长时运行，目前只支持上海区
      cls: # 函数日志
@@ -136,7 +136,7 @@
          DST_PATH: video/outputs/ # 输出桶路径
          DST_FORMATS: avi # 转码生成格式
          FFMPEG_CMD: ffmpeg -i {inputs} -y -f {dst_format} {outputs}  # 转码基础命令，您可自定义配置，但必须包含ffmpeg配置参数和格式化部分，否则会造成转码任务失败。
-         FFMPEG_DEBUG: 0 # 是否在日志中输出 0为不输出 1为输出
+         FFMPEG_DEBUG: 0 # 是否输出ffmpeg日志 0为不输出 1为输出
          TZ: Aisa/Shanghai # cls日志输出时间的时区
      events:
        - cos: # cos触发器    	
