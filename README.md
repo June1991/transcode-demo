@@ -5,7 +5,7 @@
 
 通过云函数创建ffmpeg任务进程，云函数进程与ffmpeg任务进程通过pipe和fifo的方式进行数据传输。云函数进程中的两个任务线程分别接收ffmpeg任务进程向函数进程输出的ffmpeg日志流与转码后的文件流。实时日志线程将日志流输出，上传任务负责缓存文件流并上传至用户定义的输出cos。 
 
-![1608278445413](https://main.qcloudimg.com/raw/a251768bc3a338dde3dde62e0b0fb716.png)
+![1608278445413](https://main.qcloudimg.com/raw/749ac11a39c98a1ffbf5bb6d4b758e5a.svg)
 
 ### 应用优势
 
