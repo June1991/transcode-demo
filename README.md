@@ -5,7 +5,7 @@
 
 通过云函数创建ffmpeg任务进程，云函数进程与ffmpeg任务进程通过pipe和fifo的方式进行数据传输。云函数进程中的两个任务线程分别接收ffmpeg任务进程向函数进程输出的ffmpeg日志流与转码后的文件流。实时日志线程将日志流输出，上传任务负责缓存文件流并上传至用户定义的输出cos。 
 
-![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/8.png)
+![1608278445413](https://main.qcloudimg.com/raw/a251768bc3a338dde3dde62e0b0fb716.png)
 
 ### 应用优势
 
@@ -181,10 +181,10 @@
 批量文件上传到cos会并行触发转码执行。
 
 1. 登陆云函数控制台，查看日志监控。
-![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/5.png)
+![1608278445413](https://main.qcloudimg.com/raw/d103eeaf53816d74c6045ee4929b3dc8.png)
 2. 直接点击函数对应的cls日志，查看日志检索分析 。
-![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/6.png)
-![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/7.png)
+![1608278445413](https://main.qcloudimg.com/raw/cd4e93dde155de1c3d99c21785a1674f.png)
+![1608278445413](https://main.qcloudimg.com/raw/cccd120d0c4fe9e863ec8c425b05a566.png)
 
 ## FFmpeg工具
 
@@ -221,13 +221,13 @@ FFMPEG_CMD: ffmpeg -i {inputs} -vcodec copy -y -f {dst_format} -movflags frag_ke
 转码函数运行时需要读取cos资源进行转码，并将转码后的资源写回cos，因此需要给函数配置一个授权cos全读写的运行角色。更多参考[函数运行角色](https://cloud.tencent.com/document/product/583/47933#.E8.BF.90.E8.A1.8C.E8.A7.92.E8.89.B2)。
 
 1. 登录 [访问管理](https://console.cloud.tencent.com/cam/role) 控制台，选择新建角色，角色载体为腾讯云产品服务。
- ![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/1.png) 
+ ![1608278445413](https://main.qcloudimg.com/raw/ee9eefec88e036b8cc9b4266b502a9e4.png) 
 
 2. 在“输入角色载体信息”步骤中勾选【云函数（scf）】，并单击【下一步】：
-![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/2.png)
+![1608278445413](https://main.qcloudimg.com/raw/62c18b6d88184867cfabc3e1cab48d02.png)
 
 3. 在“配置角色策略”步骤中，选择函数所需策略并单击【下一步】。如下图所示：
-![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/3.png)
+![1608278445413](https://main.qcloudimg.com/raw/3f8cde5ebf83998c72641f26c8804462.png)
    
 
    > 说明：
@@ -235,4 +235,4 @@ FFMPEG_CMD: ffmpeg -i {inputs} -vcodec copy -y -f {dst_format} -movflags frag_ke
    > 您可以直接选择 `QcloudCOSFullAccess` 对象存储（COS）全读写访问权限，如果需要更细粒度的权限配置，请根据实际情况配置选择。
 
 4. 输入角色名称，完成创建角色及授权。
-![1608278445413](https://github.com/June1991/transcode-demo/blob/main/img/4.png)
+![1608278445413](https://main.qcloudimg.com/raw/d5d1532a9c9d505e64eef2442b594fac.png)
