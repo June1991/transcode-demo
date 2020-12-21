@@ -40,9 +40,13 @@
 4. 配置[运行角色](#运行角色)权限。
 
 ## 操作步骤
-1. 下载[转码应用](https://cloud.tencent.com/document/product/1154/42990)。
+1. 下载转码应用。
 
-2. 解压文件，进入项目目录`transcode-demo`，将看到目录结构如下：
+   ```
+   git clone git@github.com:June1991/transcode-demo.git
+   ```
+
+2. 进入项目目录`transcode-demo`，将看到目录结构如下：
 
    ```
    transcode-demo
@@ -147,7 +151,7 @@
              events: 'cos:ObjectCreated:*'  # 触发事件
              enable: true
    ```
-   
+
    >?
    >
    >- 输出桶与函数建议配置在同一区域，跨区域配置应用稳定性及效率都会降低，并且会产生跨区流量费用。
@@ -155,7 +159,7 @@
    >- 转码应用必须开启函数长时运行asyncRunEnable: true。
    >- 运行角色请根据[运行角色](#运行角色)创建并授权。
    >- 示例配置的ffmpeg指令仅适用于avi转码场景，详细介绍参考[ffmpeg指令]( #FFmpeg指令)。
-   
+
 5. 在`transcode-demo`项目目录下，执行`sls deploy`部署项目。
 
    ```
@@ -164,7 +168,7 @@
 
 6. 上传视频文件到已经配置好的cos桶指定路径，则会自动转码。本示例中是cos桶test-123456789.cos.ap-shanghai.myqcloud.com下的/video/inputs/
 
-7.  转码成功后，文件将保存在您配置的输出桶路径中。本示例中是cos桶test-123456789.cos.ap-shanghai.myqcloud.com下的/video/outputs/
+7. 转码成功后，文件将保存在您配置的输出桶路径中。本示例中是cos桶test-123456789.cos.ap-shanghai.myqcloud.com下的/video/outputs/
 
 8. 如果需要调整转码配置，修改文件transcode/serverless.yml 后，重新部署云函数即可：
 
